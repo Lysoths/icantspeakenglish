@@ -8,7 +8,7 @@ const Header = () => {
       <nav className="flex w-full p-3 items-center justify-between border-b  border-[--borderColor]">
         <div className="flex gap-3">
           <Link className="text-[--menuColor] text-3xl" href="/">
-            IcantSpeakEnglish
+            weCantSpeakEnglish
           </Link>
         </div>
         <ModeToggle />
