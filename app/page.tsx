@@ -16,7 +16,9 @@ export default function Home() {
   const [score, setScore] = useState<number>(0);
   const [resultMessage, setResultMessage] = useState<string>("");
   const [options, setOptions] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true); // Yüklenme durumunu tutacak state
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isMatchDisabled, setIsMatchDisabled] = useState<boolean>(false);
+  const [correctWords, setCorrectWords] = useState<Word[]>([]); // Doğru bilinen kelimeler
 
   // Veritabanından kelimeleri al ve oyun başlangıç ayarlarını yap
   useEffect(() => {
@@ -30,12 +32,12 @@ export default function Home() {
           setCurrentIndex(0);
           setScore(0);
           setResultMessage("");
-          generateOptions(shuffledWords[0], shuffledWords); // İlk kelime için seçenekleri oluştur
+          generateOptions(shuffledWords[0], shuffledWords);
         }
       } catch (error) {
         console.error("Kelimeler yüklenirken bir hata oluştu:", error);
       } finally {
-        setIsLoading(false); // Kelimeler yüklendiğinde loading durumunu kapat
+        setIsLoading(false);
       }
     };
 
@@ -67,9 +69,11 @@ export default function Home() {
     ) {
       setScore(score + 1);
       setResultMessage("Doğru eşleştirme yaptınız!");
+      setCorrectWords([...correctWords, words[currentIndex]]); // Doğru bilinen kelimeyi ekle
       setTimeout(() => {
         setResultMessage("");
         setSelectedTurkish(null);
+        setIsMatchDisabled(false);
         if (currentIndex < words.length - 1) {
           const nextIndex = currentIndex + 1;
           setCurrentIndex(nextIndex);
@@ -79,14 +83,23 @@ export default function Home() {
         }
       }, 1000);
     } else {
-      setResultMessage("Yanlış eşleştirme, baştan başlıyor.");
-      setTimeout(() => {
-        setSelectedTurkish(null);
-        setCurrentIndex(0);
-        setScore(0);
-        generateOptions(words[0], words);
-      }, 1000);
+      setResultMessage(
+        "Yanlış eşleştirme! Doğru cevabı gördükten sonra yeniden başlatabilirsiniz."
+      );
+      setIsMatchDisabled(true); // Eşleştir butonunu devre dışı bırak
     }
+  };
+
+  const resetGame = () => {
+    const shuffledWords = [...words].sort(() => 0.5 - Math.random());
+    setWords(shuffledWords);
+    setCurrentIndex(0);
+    setScore(0);
+    setSelectedTurkish(null);
+    setResultMessage("");
+    setIsMatchDisabled(false);
+    setCorrectWords([]); // Doğru bilinen kelimeleri sıfırla
+    generateOptions(shuffledWords[0], shuffledWords);
   };
 
   if (isLoading) {
@@ -132,11 +145,17 @@ export default function Home() {
               {options.map((turkishWord, index) => (
                 <li
                   key={index}
-                  onClick={() => setSelectedTurkish(turkishWord)}
+                  onClick={() =>
+                    !isMatchDisabled && setSelectedTurkish(turkishWord)
+                  }
                   className={`cursor-pointer p-3 border rounded-lg text-center font-medium ${
                     selectedTurkish === turkishWord
                       ? "bg-gray-200"
-                      : "bg-yellow-100 text-yellow-800"
+                      : !isMatchDisabled
+                      ? "bg-yellow-100 text-yellow-800"
+                      : words[currentIndex].turkish.includes(turkishWord)
+                      ? "bg-green-200 text-green-800" // Yanlış durumda doğru cevabı yeşil yap
+                      : ""
                   }`}
                   style={{
                     borderColor:
@@ -154,7 +173,12 @@ export default function Home() {
 
         <button
           onClick={checkMatch}
-          className="w-full py-3 rounded-lg font-semibold mb-6 transition-colors bg-green-500 text-white hover:bg-green-600"
+          disabled={isMatchDisabled}
+          className={`w-full py-3 rounded-lg font-semibold mb-6 transition-colors ${
+            isMatchDisabled
+              ? "bg-gray-400 text-white cursor-not-allowed"
+              : "bg-green-500 text-white hover:bg-green-600"
+          }`}
         >
           Eşleştir
         </button>
@@ -163,15 +187,39 @@ export default function Home() {
           <p
             className="text-lg font-semibold text-center"
             style={{
-              color:
-                resultMessage === "Doğru eşleştirme yaptınız!"
-                  ? "var(--successColor)"
-                  : "var(--errorColor)",
+              color: resultMessage.includes("Doğru")
+                ? "var(--successColor)"
+                : "var(--errorColor)",
             }}
           >
             {resultMessage}
           </p>
         )}
+
+        {isMatchDisabled && (
+          <button
+            onClick={resetGame}
+            className="w-full py-3 rounded-lg font-semibold transition-colors bg-blue-500 text-white hover:bg-blue-600"
+          >
+            Yeniden Başlat
+          </button>
+        )}
+      </div>
+
+      {/* Doğru bilinen kelimeleri gösteren kutu */}
+      <div className="w-full max-w-2xl mt-8 p-4 border rounded-lg bg-gray-100 overflow-y-auto h-48">
+        <h2 className="text-xl font-bold mb-4">Doğru Bilinen Kelimeler</h2>
+        <div className="flex flex-wrap gap-2">
+          {correctWords.map((word, index) => (
+            <div
+              key={index}
+              className="p-2 bg-green-200 text-green-800 rounded-lg shadow"
+            >
+              <span className="font-semibold">{word.english}</span>:{" "}
+              {word.turkish.join(", ")}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
