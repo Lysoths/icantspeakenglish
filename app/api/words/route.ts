@@ -17,7 +17,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const { english, turkish } = await request.json();
+  const { english, turkish, imageUrl } = await request.json(); // imageUrl alanını ekledik
 
   try {
     // İngilizce kelimeyi küçük harfe çevirerek kontrol et
@@ -39,6 +39,7 @@ export async function POST(request: Request) {
       data: {
         english: lowerCaseEnglish,
         turkish,
+        imageUrl, // imageUrl verisini kaydediyoruz
       },
     });
 

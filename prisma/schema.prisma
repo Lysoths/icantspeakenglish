@@ -23,4 +23,5 @@ model Word {
   id       String   @id @default(auto()) @map("_id") @db.ObjectId
   english  String   @unique
   turkish  String[]
+  imageUrl String?   
 }
