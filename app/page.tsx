@@ -109,11 +109,12 @@ export default function Home() {
   const handleMistake = () => {
     setResultMessage("Yanlış eşleştirme!");
     if (maxScore > 20) {
-      setMaxScore((prevMaxScore) => prevMaxScore - 20); // Maksimum puanı 20 azalt
+      setMaxScore((prevMaxScore) => prevMaxScore - 20);
       setIncorrectWords([...incorrectWords, words[currentIndex]]);
       setIsMatchDisabled(true);
     } else {
-      setMaxScore(0); // Puan 0 ise dur
+      setMaxScore(0);
+      setIsMatchDisabled(true); // Maksimum puan 0 olduğunda eşleştirmeyi durdur
     }
   };
 
@@ -170,7 +171,7 @@ export default function Home() {
       className="flex flex-col items-center justify-center p-6 mt-7 max-w-full"
       style={{ backgroundColor: "var(--arkaPlan)", color: "var(--yaziRengi)" }}
     >
-      <div className="w-full flex  flex-col max-w-2xl shadow-lg rounded-lg p-6 mb-6 bg-[--arkaPlan] text-[--yaziRengi]">
+      <div className="w-full flex flex-col max-w-2xl shadow-lg rounded-lg p-6 mb-6 bg-[--arkaPlan] text-[--yaziRengi]">
         <h1 className="text-3xl font-bold mb-4 text-center">
           İngilizce - Türkçe Kelime Eşleştirme
         </h1>
@@ -261,9 +262,9 @@ export default function Home() {
 
         <button
           onClick={checkMatch}
-          disabled={isMatchDisabled}
+          disabled={isMatchDisabled || maxScore <= 0} // Maksimum puan 0 olduğunda devre dışı bırak
           className={`w-full py-3 rounded-lg font-semibold mb-6 transition-colors ${
-            isMatchDisabled
+            isMatchDisabled || maxScore <= 0
               ? "bg-gray-400 text-white cursor-not-allowed"
               : "bg-green-500 text-white hover:bg-green-600"
           }`}
@@ -282,6 +283,7 @@ export default function Home() {
             <button
               onClick={continueGame}
               className="w-1/2 py-3 rounded-lg font-semibold transition-colors bg-orange-500 text-white hover:bg-orange-600"
+              disabled={maxScore <= 0} // Maksimum puan 0 olduğunda devam edilemez
             >
               Devam Et
             </button>

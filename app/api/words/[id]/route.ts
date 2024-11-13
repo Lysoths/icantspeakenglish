@@ -6,10 +6,10 @@ const prisma = new PrismaClient();
 // Kelimeyi güncelle (PUT)
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } } // context içindeki params'ı kullanıyoruz
 ) {
-  const { english, turkish, imageUrl } = await request.json(); // imageUrl de alınıyor
-  const wordId = params.id; // id'yi string olarak bırakıyoruz
+  const { english, turkish, imageUrl } = await request.json();
+  const wordId = context.params.id; // id'yi context'ten alıyoruz
 
   try {
     // İngilizce kelimeyi küçük harfe çevirerek kontrol et
@@ -20,7 +20,7 @@ export async function PUT(
       where: {
         english: lowerCaseEnglish,
         id: {
-          not: wordId, // wordId string tipinde
+          not: wordId,
         },
       },
     });
@@ -33,11 +33,11 @@ export async function PUT(
     }
 
     const updatedWord = await prisma.word.update({
-      where: { id: wordId }, // wordId string tipinde
+      where: { id: wordId },
       data: {
         english: lowerCaseEnglish,
         turkish,
-        imageUrl, // Yeni alan imageUrl eklendi
+        imageUrl,
       },
     });
 
@@ -58,13 +58,13 @@ export async function PUT(
 // Kelimeyi sil (DELETE)
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } } // context içindeki params'ı kullanıyoruz
 ) {
-  const wordId = params.id; // id'yi string olarak bırakıyoruz
+  const wordId = context.params.id;
 
   try {
     await prisma.word.delete({
-      where: { id: wordId }, // wordId string tipinde
+      where: { id: wordId },
     });
 
     return NextResponse.json({
