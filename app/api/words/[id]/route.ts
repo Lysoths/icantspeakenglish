@@ -4,18 +4,21 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 // Kelimeyi güncelle (PUT)
-export async function PUT(
-  request: Request,
-  context: { params: { id: string } } // context içindeki params'ı kullanıyoruz
-) {
+export async function PUT(request: Request) {
   const { english, turkish, imageUrl } = await request.json();
-  const wordId = context.params.id; // id'yi context'ten alıyoruz
+  const url = new URL(request.url);
+  const wordId = url.pathname.split("/").pop(); // URL'den id'yi alır
+
+  if (!wordId) {
+    return NextResponse.json({
+      success: false,
+      message: "Geçersiz ID",
+    });
+  }
 
   try {
-    // İngilizce kelimeyi küçük harfe çevirerek kontrol et
     const lowerCaseEnglish = english.toLowerCase();
 
-    // Aynı İngilizce kelime var mı kontrol et (güncellenen kelime dışında)
     const existingWord = await prisma.word.findFirst({
       where: {
         english: lowerCaseEnglish,
@@ -56,11 +59,16 @@ export async function PUT(
 }
 
 // Kelimeyi sil (DELETE)
-export async function DELETE(
-  request: Request,
-  context: { params: { id: string } } // context içindeki params'ı kullanıyoruz
-) {
-  const wordId = context.params.id;
+export async function DELETE(request: Request) {
+  const url = new URL(request.url);
+  const wordId = url.pathname.split("/").pop(); // URL'den id'yi alır
+
+  if (!wordId) {
+    return NextResponse.json({
+      success: false,
+      message: "Geçersiz ID",
+    });
+  }
 
   try {
     await prisma.word.delete({
