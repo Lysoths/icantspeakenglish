@@ -84,7 +84,7 @@ export default function Home() {
       }, 1000);
     } else {
       setResultMessage(
-        "Yanlış eşleştirme! Doğru cevabı gördükten sonra yeniden başlatabilirsiniz."
+        "Yanlış eşleştirme! Cevabı gördükten sonra yeniden başlatabilirsiniz."
       );
       setIsMatchDisabled(true); // Eşleştir butonunu devre dışı bırak
     }
